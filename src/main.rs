@@ -29,27 +29,35 @@ const NUMBERS_TO_WORDS: [&'static str; 10] = [
 fn parse_words(line: &str) -> Vec<CodeNumber> {
     let mut numbers: Vec<CodeNumber> = vec![];
 
+    // Index used as word value
     for (index, word) in NUMBERS_TO_WORDS.iter().enumerate() {
-        let number_pos = line.find(word);
+        // let number_pos = line.find(word);
+        let found_words: Vec<_> = line.match_indices(word).collect();
 
-        if number_pos.is_none() {
+        if found_words.is_empty() {
             continue;
         }
 
-        match number_pos {
-            Some(pos) => {
-                let digit_from_index = index.try_into();
+        for (pos, _) in found_words {
+            let digit_from_index = index.try_into();
 
-                match digit_from_index {
-                    Ok(digit) => numbers.push(CodeNumber {
-                        digit,
-                        index: number_pos.unwrap(),
-                    }),
-                    _ => (),
-                };
-            }
-            _ => (),
-        };
+            match digit_from_index {
+                Ok(digit) => numbers.push(CodeNumber { digit, index: pos }),
+                _ => (),
+            };
+        }
+
+        // match number_pos {
+        //     Some(pos) => {
+        //         let digit_from_index = index.try_into();
+
+        //         match digit_from_index {
+        //             Ok(digit) => numbers.push(CodeNumber { digit, index: pos }),
+        //             _ => (),
+        //         };
+        //     }
+        //     _ => (),
+        // };
     }
 
     numbers
@@ -141,6 +149,7 @@ fn get_first_and_last(digits: &Vec<CodeNumber>) -> Option<LineNumbers> {
         println!("{}{}", codenum.digit, codenum.index);
 
         if codenum.digit == 0 {
+            // Will get a 0 if "zero" is in the example file.
             continue;
         }
 
@@ -225,6 +234,14 @@ mod tests {
         assert_eq!(numbers[3].final_str, "72");
         assert_eq!(numbers[4].final_str, "84");
         assert_eq!(numbers[5].final_str, "98");
+        assert_eq!(numbers[39].final_str, "99");
+
+        // THIS IS THE PROBLEM CHILD
+        assert_eq!(numbers[43].final_str, "22");
+
+        assert_eq!(numbers[42].final_str, "88");
+        assert_eq!(numbers[52].final_str, "27");
+        assert_eq!(numbers[74].final_str, "22");
 
         for num in numbers {
             assert!(num.final_str.len() == 2);
