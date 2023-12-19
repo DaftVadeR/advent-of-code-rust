@@ -105,7 +105,7 @@ fn main() {
     let (numbers, total) = get_numbers_from_file();
 
     for num in numbers {
-        println!("Number: {}{}", num.first.digit, num.last.digit);
+        println!("Number: {}", num.final_str);
     }
 
     println!("---");
@@ -174,6 +174,10 @@ fn get_numbers_from_file() -> (Vec<LineNumbers>, u32) {
     let mut total = 0;
 
     let reader = get_file_reader();
+    let reader2 = get_file_reader();
+    let count = reader2.lines().count();
+
+    println!("Lines in file: {}", count);
 
     for line in reader.lines() {
         let line = line.unwrap();
@@ -198,12 +202,11 @@ fn get_numbers_from_file() -> (Vec<LineNumbers>, u32) {
 
         let line_numbers = first_last_numbers.unwrap();
 
-        let concatenated = format!("{}{}", line_numbers.first.digit, line_numbers.last.digit);
+        // let concatenated = format!("{}{}", line_numbers.first.digit, line_numbers.last.digit);
 
-        total += concatenated.parse::<u32>().unwrap();
+        total += line_numbers.final_str.parse::<u32>().unwrap();
 
         final_numbers.push(line_numbers);
-        // final_numbers.push(concatenated);
     }
 
     (final_numbers, total)
@@ -222,6 +225,10 @@ mod tests {
         assert_eq!(numbers[3].final_str, "72");
         assert_eq!(numbers[4].final_str, "84");
         assert_eq!(numbers[5].final_str, "98");
+
+        for num in numbers {
+            assert!(num.final_str.len() == 2);
+        }
 
         // total of all numbers
         println!("Total: {}", total);
