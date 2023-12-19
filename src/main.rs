@@ -2,8 +2,9 @@
 //use std::env;
 //use std::fs;
 
+use std::char;
 use std::fs::File;
-use std::io::{BufReader, BufRead};
+use std::io::{BufRead, BufReader};
 
 // let time_date = chrono::NaiveTime::parse_from_str(release.time.as_str(), "%H:%M")
 // .expect("Could not parse time");
@@ -18,60 +19,79 @@ use std::io::{BufReader, BufRead};
 // let current_date_str = now.format("%Y-%m-%d %H:%M").to_string();
 
 const NUMBERS_TO_WORDS: [&'static str; 10] = [
-    "zero",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine"
+    "zero", // Might cause issues - remove if so
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 ];
 
-type CodeNumber = (u32, usize);
+// type CodeNumber = (u32, usize);
 //struct CodeNumber(digit: u32, index: usize);
 
-fn get_first_number(line: &str) -> CodeNumber {
-    
+fn parse_words(line: &str) -> Vec<CodeNumber> {
+    let mut numbers: Vec<CodeNumber> = vec![];
 
-    let a: CodeNumber = (1,1);
-    a
+    for (index, word) in NUMBERS_TO_WORDS.iter().enumerate() {
+        let number_pos = line.find(word);
+
+        if number_pos.is_none() {
+            continue;
+        }
+
+        match number_pos {
+            Some(pos) => {
+                let digit_from_index = index.try_into();
+
+                match digit_from_index {
+                    Ok(digit) => numbers.push(CodeNumber {
+                        digit,
+                        index: number_pos.unwrap(),
+                    }),
+                    _ => (),
+                };
+            }
+            _ => (),
+        };
+    }
+
+    numbers
 }
 
-fn get_last_number() {
-    
-}
+fn parse_digits(line: &str) -> Vec<CodeNumber> {
+    let mut digits: Vec<CodeNumber> = vec![];
+    // Used due to limitations of map + filter.
+    for (index, ch) in line.chars().enumerate() {
+        let num_opt = ch.to_digit(10);
+        if num_opt.is_some() {
+            let num = num_opt.unwrap();
+            let code_number = CodeNumber { digit: num, index };
 
-fn parse_words() -> Vec<u32> {
-    let first_number_str: Option<u32> = None;
-    let second_number_str: Option<u32> = None;
-
-    let earliest_word_number: Option<usize> = None;
-    let latest_word_number: Option<usize> = None;
-
-    for word in NUMBERS_TO_WORDS {
-        let temp_first_number_pos = line.find(word);
-        let temp_second_number_pos = line.rfind(word);
-
-        first_number_str = match temp_first_number_pos {
-            Some(val) => {
-                if(earliest_word_number.unwrap_or(-1) )
-                val
-            },
-            None => None,
+            digits.push(code_number);
         }
     }
 
+    digits
 
-}
+    // --- Old attempt - uses filter + map ---
+    // line
+    //     .chars()
+    //     .enumerate()
+    //     .filter(|(index, num_char)|{
+    //         let num = num_char.to_digit(10);
+    //         num.is_some()
+    //     })
+    //     .map(|(index, num_char)| {
+    //         // Redundant and ugly, but needed due to not being able to return NO VALUE from the map function, otherwise I'd have only used the map function.
+    //         // Have to find a prettier methodology here.
+    //         let num = num_char.to_digit(10);
 
-fn parse_digits(line: &str) -> Vec<u32> {
-    line 
-        .chars()
-        .filter_map(|num_char| num_char.to_digit(10))
-        .collect()
+    //         match num {
+    //             Some(num) => return CodeNumber {
+    //                 digit: num,
+    //                 index: index,
+    //             },
+    //             _ => None, // Will never happen, due to the filter.
+    //         };
+    //     })
+    //     .collect()
 }
 
 fn main() {
@@ -79,40 +99,65 @@ fn main() {
     //     fs::read_to_string("d1.txt".to_string()).expect("Should have been able to read the file");
     // println!("With text:\n{contents}");
     // for line in contents {
-    //     
+    //
     // }
 
     let (numbers, total) = get_numbers_from_file();
 
     for num in numbers {
-        println!("{}", num)
+        println!("Number: {}{}", num.first.digit, num.last.digit);
     }
 
-    println!("{}", total);
+    println!("---");
+    println!("---");
+    println!("---");
+    println!("---");
+
+    println!("Total: {}", total);
 }
 
-type SelectedCodeNumber = (Option<CodeNumber>, Option<CodeNumber>);
+#[derive(Clone, Debug)]
+struct CodeNumber {
+    digit: u32,
+    index: usize,
+}
 
-fn get_first_last_numbers(line: &str) -> Option<SelectedCodeNumber> {
-    let digits = parse_digits(&line);
-     
+#[derive(Clone, Debug)]
+struct LineNumbers {
+    first: CodeNumber,
+    last: CodeNumber,
+    final_str: String,
+}
+
+fn get_first_and_last(digits: &Vec<CodeNumber>) -> Option<LineNumbers> {
     if digits.is_empty() {
-        None
-        // return ((CodeNumber(None), CodeNumber(None));
+        return None;
     }
-    // debug!(digits);
-    
-    // println!("{}", line);
-    // println!("{}", digits.len());
 
-    // let first_number: u32 = digits.first().unwrap_or(None)
-    // let last_number = digits.last().unwrap_or(first_number);
-    // 
-    // let first: Option<CodeNumber> =  
+    let mut temp_first = &digits[0];
+    let mut temp_last = &digits[0];
 
-    let a: u32 = 13;
-    let b: usize = 14;
-    ((a, b) as SelectedCodeNumber)
+    for codenum in digits {
+        println!("{}{}", codenum.digit, codenum.index);
+
+        if codenum.digit == 0 {
+            continue;
+        }
+
+        if codenum.index < temp_first.index {
+            temp_first = codenum;
+        }
+
+        if codenum.index > temp_last.index {
+            temp_last = codenum;
+        }
+    }
+
+    Some(LineNumbers {
+        first: temp_first.clone(),
+        last: temp_last.clone(),
+        final_str: format!("{}{}", temp_first.digit, temp_last.digit),
+    })
 }
 
 fn get_file_reader() -> BufReader<File> {
@@ -124,29 +169,44 @@ fn get_file_reader() -> BufReader<File> {
     reader
 }
 
-fn get_numbers_from_file() -> (Vec<String>, u32) {
-    let mut final_numbers = vec![];
+fn get_numbers_from_file() -> (Vec<LineNumbers>, u32) {
+    let mut final_numbers: Vec<LineNumbers> = vec![];
     let mut total = 0;
-    
+
     let reader = get_file_reader();
 
     for line in reader.lines() {
         let line = line.unwrap();
 
         if line.is_empty() {
-            break;
+            break; // End of file
         }
 
-        let first_last_numbers = get_first_last_numbers();
+        let mut from_numbers = parse_digits(&line);
+        let mut from_words = parse_words(&line);
 
-        // let concatenated = format!("{}{}", first_number, last_number);
+        let mut compare_indexes: Vec<CodeNumber> = vec![];
 
-        // total+= concatenated.parse::<u32>().unwrap();  
+        compare_indexes.append(&mut from_numbers);
+        compare_indexes.append(&mut from_words);
 
+        let first_last_numbers = get_first_and_last(&compare_indexes);
+
+        if first_last_numbers.is_none() {
+            continue;
+        }
+
+        let line_numbers = first_last_numbers.unwrap();
+
+        let concatenated = format!("{}{}", line_numbers.first.digit, line_numbers.last.digit);
+
+        total += concatenated.parse::<u32>().unwrap();
+
+        final_numbers.push(line_numbers);
         // final_numbers.push(concatenated);
     }
 
-   // (final_numbers, total)
+    (final_numbers, total)
 }
 
 #[cfg(test)]
@@ -156,15 +216,14 @@ mod tests {
     #[test]
     fn it_works() {
         let (numbers, total) = get_numbers_from_file();
-        assert_eq!(numbers[0], "85");
-        assert_eq!(numbers[1], "22");
-        assert_eq!(numbers[2], "66");
-        assert_eq!(numbers[3], "72");
-        assert_eq!(numbers[4], "84");
-        assert_eq!(numbers[5], "98");
+        assert_eq!(numbers[0].final_str, "85");
+        assert_eq!(numbers[1].final_str, "22");
+        assert_eq!(numbers[2].final_str, "66");
+        assert_eq!(numbers[3].final_str, "72");
+        assert_eq!(numbers[4].final_str, "84");
+        assert_eq!(numbers[5].final_str, "98");
 
         // total of all numbers
         println!("Total: {}", total);
     }
 }
-
