@@ -1,37 +1,17 @@
-//use chrono;
-//use std::env;
-//use std::fs;
-
-use std::char;
+// use std::char;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-
-// let time_date = chrono::NaiveTime::parse_from_str(release.time.as_str(), "%H:%M")
-// .expect("Could not parse time");
-
-// now = now
-//     .with_hour(time_date.hour())
-//     .expect("Couldn't change hour");
-// now = now
-//     .with_minute(time_date.minute())
-//     .expect("Couldn't change minute");
-//
-// let current_date_str = now.format("%Y-%m-%d %H:%M").to_string();
 
 const NUMBERS_TO_WORDS: [&'static str; 10] = [
     "zero", // Might cause issues - remove if so
     "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 ];
 
-// type CodeNumber = (u32, usize);
-//struct CodeNumber(digit: u32, index: usize);
-
 fn parse_words(line: &str) -> Vec<CodeNumber> {
     let mut numbers: Vec<CodeNumber> = vec![];
 
     // Index used as word value
     for (index, word) in NUMBERS_TO_WORDS.iter().enumerate() {
-        // let number_pos = line.find(word);
         let found_words: Vec<_> = line.match_indices(word).collect();
 
         if found_words.is_empty() {
@@ -46,18 +26,6 @@ fn parse_words(line: &str) -> Vec<CodeNumber> {
                 _ => (),
             };
         }
-
-        // match number_pos {
-        //     Some(pos) => {
-        //         let digit_from_index = index.try_into();
-
-        //         match digit_from_index {
-        //             Ok(digit) => numbers.push(CodeNumber { digit, index: pos }),
-        //             _ => (),
-        //         };
-        //     }
-        //     _ => (),
-        // };
     }
 
     numbers
@@ -77,39 +45,9 @@ fn parse_digits(line: &str) -> Vec<CodeNumber> {
     }
 
     digits
-
-    // --- Old attempt - uses filter + map ---
-    // line
-    //     .chars()
-    //     .enumerate()
-    //     .filter(|(index, num_char)|{
-    //         let num = num_char.to_digit(10);
-    //         num.is_some()
-    //     })
-    //     .map(|(index, num_char)| {
-    //         // Redundant and ugly, but needed due to not being able to return NO VALUE from the map function, otherwise I'd have only used the map function.
-    //         // Have to find a prettier methodology here.
-    //         let num = num_char.to_digit(10);
-
-    //         match num {
-    //             Some(num) => return CodeNumber {
-    //                 digit: num,
-    //                 index: index,
-    //             },
-    //             _ => None, // Will never happen, due to the filter.
-    //         };
-    //     })
-    //     .collect()
 }
 
 fn main() {
-    // let contents =
-    //     fs::read_to_string("d1.txt".to_string()).expect("Should have been able to read the file");
-    // println!("With text:\n{contents}");
-    // for line in contents {
-    //
-    // }
-
     let (numbers, total) = get_numbers_from_file();
 
     for num in numbers {
@@ -149,7 +87,7 @@ fn get_first_and_last(digits: &Vec<CodeNumber>) -> Option<LineNumbers> {
         println!("{}{}", codenum.digit, codenum.index);
 
         if codenum.digit == 0 {
-            // Will get a 0 if "zero" is in the example file.
+            // Will get a 0 if "zero" is in the example file - not a part of the question.
             continue;
         }
 
@@ -210,8 +148,6 @@ fn get_numbers_from_file() -> (Vec<LineNumbers>, u32) {
         }
 
         let line_numbers = first_last_numbers.unwrap();
-
-        // let concatenated = format!("{}{}", line_numbers.first.digit, line_numbers.last.digit);
 
         total += line_numbers.final_str.parse::<u32>().unwrap();
 
